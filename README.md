@@ -2,5 +2,5 @@ The password manager offers convenience and, more importantly, helps you create 
 
 It uses in memory data storage to prevent online data leaks.
 
+<img width="569" alt="image" src="https://github.com/SerikMeiirbek/password-manager/assets/33642388/63ff70c7-99ff-4833-92b6-7ee5a970f674">
 
-<img width="573" alt="image" src="https://github.com/SerikMeiirbek/password-manager/assets/33642388/6b1a8424-07c0-4b53-898c-3da6ffa4a4e7">
