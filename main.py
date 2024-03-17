@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 import random
 import pyperclip
+import json
 
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
@@ -33,7 +34,7 @@ def generate_password():
     for char in password_list:
         password += char
 
-    print(f"Your password is: {password}")
+    # print(f"Your password is: {password}")
     pyperclip.copy(password)
     password_entry.insert(0, password)
 
@@ -48,22 +49,64 @@ def save_password():
                                    message=f"These are the details are entered: \nEmail:{email_username_input.get()} "
                                            f"\nPassword:{password_entry.get()} \nIs it ok to save?")
 
+    website = website_input.get()
+    new_data = {
+        website: {
+            "email": email_username_input.get(),
+            "password": password_entry.get()
+        }
+    }
+
     if is_ok:
-        with open("data.txt", "a") as data_file:
-            data_file.write(f"\n{website_input.get()} | {email_username_input.get()} | {password_entry.get()}")
-        clear_input_fields()
+        try:
+            with open("data.json", "r") as data_file:
+                # Reading old data
+                data = json.load(data_file)
+        except FileNotFoundError:
+            with open("data.json", "w") as data_file:
+                # Dumping data to data_file
+                json.dump(new_data, data_file, indent=4)
+        else:
+            with open("data.json", "w") as data_file:
+                # Updating old data with new data
+                data.update(new_data)
+                # Dumping data to data_file
+                json.dump(data, data_file, indent=4)
+        finally:
+            # Clearing input fields
+            clear_input_fields()
 
 
 # -------------------------- Clear input fields -------------------------- #
 def clear_input_fields():
     website_input.delete(0, END)
-    email_username_input.delete(0, END)
     password_entry.delete(0, END)
 
 
 # -------------------------- Check input fields -------------------------- #
 def validate_input_fields():
     return website_input.get() != "" and email_username_input.get() != "" and password_entry.get() != ""
+
+
+# -------------------------- Search Websites -------------------------- #
+def find_password():
+    website = website_input.get()
+    try:
+        with open("data.json", "r") as data_file:
+            data = json.load(data_file)
+    except FileNotFoundError:
+        messagebox.showinfo(title="Error", message="No Datafile found")
+    else:
+        if website in data:
+            email = data[website]["email"]
+            password = data[website]["password"]
+            messagebox.showinfo(
+                                title=website,
+                                message=f"Email:  {email}"
+                                f"\nPassword:  {password}")
+        else:
+            messagebox.showinfo(title="Error",
+                                message=f"No details for {website_input.get()} exists.")
 
 
 # ---------------------------- UI SETUP ------------------------------- #
@@ -80,15 +123,19 @@ canvas.grid(row=0, column=1)
 website_label = Label(text="Website:")
 website_label.grid(row=1, column=0)
 
-website_input = Entry(width=35)
-website_input.grid(row=1, column=1, columnspan=2)
+website_input = Entry(width=21)
+website_input.grid(row=1, column=1)
 website_input.focus()
+
+# Search
+search_btn = Button(text="Search", width=12, command=find_password)
+search_btn.grid(row=1, column=2)
 
 # Email/Username
 email_username_label = Label(text="Email/Username:")
 email_username_label.grid(row=2, column=0)
 
-email_username_input = Entry(width=35)
+email_username_input = Entry(width=38)
 email_username_input.grid(row=2, column=1, columnspan=2)
 email_username_input.insert(0, "password.manager@gmail.com")
 
